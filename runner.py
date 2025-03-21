@@ -3,12 +3,13 @@ import jpype
 import jpype.imports
 from jpype import JProxy, JClass, java
 import time
+import socket
 
 class arm():
      
     def __init__(self):
         # Path to your JAR file
-        JAR_PATH = "/opt/microbot.jar"
+        JAR_PATH = "/opt/microbot/microbot.jar"
         jpype.startJVM(classpath=[JAR_PATH])
 
         # Load the Java class containing the main method
@@ -41,13 +42,35 @@ class arm():
         self.microbot.getPluginManager().setPluginEnabled(self.get_plugin_by_name(plugin_name), True)
         self.microbot.getPluginManager().startPlugins()
 
-    def main(self):
-        self.go_to_job_site(2981,3234,0)
-        plugin_name = "Auto Mining"
+    def main(self, location, plugin_name):
+        self.go_to_job_site(location['x'], location['y'], location['plane'])
         self.start_plugin(plugin_name)
 
-    
+def start_client():
+    # Create a socket object
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Get the local machine name
+    host = 'localhost'
+    port = 12333  # The same port as used by the server
+
+    # Connect to the server
+    client_socket.connect((host, port))
+
+    # Send data to the server
+    message = "Hello, Server!"
+    client_socket.send(message.encode('utf-8'))
+
+    # Close the connection
+    client_socket.close()
 
 if __name__ == "__main__":
+    start_client()
+'''    loc = {
+        'x': 2981,
+        'y': 3234,
+        'plane': 0
+    }
+    plugin = "Auto Mining"
     arm = arm()
-    arm.main()
+    arm.main(loc, plugin)'''
