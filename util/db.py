@@ -49,6 +49,7 @@ class MariaDB:
         return self.cursor.fetchall()
 
     def execute(self, query, params=None, commit=True):
+        self.connect()
         """Execute INSERT, UPDATE, DELETE queries"""
         try:
             self.cursor.execute(query, params or ())
@@ -86,7 +87,8 @@ class MariaDB:
         query = '''
         SELECT 
         *
-        FROM job_types;
+        FROM job_types
+        WHERE state = 'PROD';
         '''
         return self.fetch_all(query)
     
@@ -95,7 +97,7 @@ class MariaDB:
         SELECT 
         *
         FROM job_types
-        WHERE purpose = 'skill';
+        WHERE purpose = 'skill' AND state = 'PROD';
         '''
         return self.fetch_all(query)
     
@@ -107,7 +109,25 @@ class MariaDB:
         '''
         self.execute(query)
         return
-       
+    
+    def get_user_status_stopped(self):
+        query = '''
+        SELECT 
+        *
+        FROM users
+        WHERE account_status = 'ready' AND status = 'stopped';
+        '''
+        return self.fetch_all(query)
+    
+    def set_user_status(self, user, status):
+        query = f'''
+        UPDATE users
+        SET status = '{status}'
+        WHERE os_user = '{user}';
+        '''
+        print(query)
+        self.execute(query)
+    
 
 if __name__ == "__main__":
     with MariaDB() as db:

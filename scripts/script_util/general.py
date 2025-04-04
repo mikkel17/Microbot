@@ -1,5 +1,5 @@
 from jpype import JClass
-
+import time
 
 class General():
     
@@ -58,9 +58,29 @@ class General():
 
         return stats
     
-    def pick_tool(self, tool):
+    def get_bank_items(self, items):
+        rs2bank = JClass("net.runelite.client.plugins.microbot.util.bank.Rs2Bank")
+        items_result = {}
+        while True:
+            rs2bank.walkToBank()
+            time.sleep(5)
+            rs2bank.openBank()
+            time.sleep(1)
+            rs2bank.depositEquipment()
+            time.sleep(1)
+            rs2bank.depositAll()
+            time.sleep(1)
+            for item in items:
+                items_result[item] = rs2bank.count(item)
+            if items_result != {}:
+                break
+        rs2bank.closeBank()
+        return items_result
+    
+    def pick_tool(self, tool_dict):
         stats = self.get_stats()
         rs2bank = JClass("net.runelite.client.plugins.microbot.util.bank.Rs2Bank")
+        tool = next(iter(tool_dict))
 
         if tool == 'pickaxe':
             skill = 'Mining'

@@ -8,10 +8,10 @@ import ast
 from scripts.script_util.general import General
 from util.logger import SimpleLogger
 
-class AutoFishing():
+class AutoCooking():
     def __init__(self, user):
         self.user = user
-        self.plugin_name = "Auto Fishing"
+        self.plugin_name = "Auto Cooking"
         self.microbot = JClass("net.runelite.client.plugins.microbot.Microbot")
         self.plugin = self.get_plugin_by_name()
         self.general = General()
@@ -35,8 +35,8 @@ class AutoFishing():
         location = ast.literal_eval(input_dict['location'])
         req_item = ast.literal_eval(input_dict['req_item'])
 
-        self.set_equipment(req_item)
-        print('equipment set')
+        #self.set_equipment(req_item)
+        #print('equipment set')
 
         self.walkToLocation(location['x'], location['y'], location['plane'])
        
@@ -54,42 +54,21 @@ class AutoFishing():
         print('MANUAL STOP BY SCRIPT')
         time.sleep(3)
         return
-
-    def set_equipment(self, item_dict):
-        item = next(iter(item_dict))
-        self.logger.info(self.user, f'Setting equipment. {item}')
-        rs2bank = JClass("net.runelite.client.plugins.microbot.util.bank.Rs2Bank")
-        rs2inventory = JClass("net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory")
-        while True:
-            print('walk to bank')
-            rs2bank.walkToBankAndUseBank()
-            print('depositEquipment')
-            time.sleep(3)
-            rs2bank.depositEquipment()
-            time.sleep(1)
-            print('depositAll')
-            rs2bank.depositAll()
-            time.sleep(2)
-            print('withdraw net')
-            rs2bank.withdrawItem(item)
-            time.sleep(2)
-            rs2bank.closeBank()
-
-            if rs2inventory.hasItem(item):
-                break
-            else:
-                print('trying to set item again ' + item)
-
-        self.logger.info(self.user, f'Setting equipment done. {item}')
-        #Rs2Inventory.wield(item)
     
     def plugin_config(self, job_details):
-        fish = JClass("net.runelite.client.plugins.microbot.nateplugins.skilling.natefishing.enums.Fish")
+        CookingItem = JClass("net.runelite.client.plugins.microbot.cooking.enums.CookingItem")
+        CookingLocation = JClass("net.runelite.client.plugins.microbot.cooking.enums.CookingLocation")
+        #CookingActivity = JClass("net.runelite.client.plugins.microbot.cooking.enums.CookingActivity")
         #microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.GOLD)
 
-        if job_details['fish'] == "shrimp":
-            self.microbot.getConfigManager().setConfiguration("Fishing", "Fish", fish.SHRIMP)
-        self.microbot.getConfigManager().setConfiguration("Fishing", "UseBank", job_details['bank'])
+        #self.microbot.getConfigManager().setConfiguration("autocooking", "cookingActivity", CookingItem.COOKING)
+
+        if job_details['itemToCook'] == "Raw shrimp":
+            self.microbot.getConfigManager().setConfiguration("autocooking", "itemToCook", CookingItem.RAW_SHRIMP)
+        elif job_details['itemToCook'] == "Raw anchovies":
+            self.microbot.getConfigManager().setConfiguration("autocooking", "itemToCook", CookingItem.RAW_ANCHOVIES)
+        if job_details['cookingLocation'] == "Al Kharid":
+            self.microbot.getConfigManager().setConfiguration("autocooking", "cookingLocation", CookingLocation.AL_KHARID)
         time.sleep(5)
 
 
@@ -107,5 +86,5 @@ if __name__ == "__main__":
         'stray': 10,
         'bank': True
     }
-    mining = AutoFishing()
+    mining = AutoCooking()
     mining.run(input_dict)

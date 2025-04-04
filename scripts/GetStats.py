@@ -5,10 +5,11 @@ import jpype.imports
 import time
 
 from scripts.script_util.general import General
-
+from util.logger import SimpleLogger
 
 class GetStats():
-    def __init__(self):
+    def __init__(self, user):
+        self.user = user
         self.plugin_name = "GetStats"
         self.general = General()
 
@@ -42,7 +43,7 @@ class GetStats():
 
 
 
-        rs2bank = JClass("net.runelite.client.plugins.microbot.util.bank.Rs2Bank")
+        '''rs2bank = JClass("net.runelite.client.plugins.microbot.util.bank.Rs2Bank")
         
         rs2bank.walkToBank()
         rs2bank.openBank()
@@ -55,6 +56,8 @@ class GetStats():
         print(rs2bank.hasBankItem(JClass("java.lang.String")("Iron ore"), jpype.JInt(9999)))
         
         rs2bank.closeBank()
+        '''
+
         '''
         print("INVENTORY TEST")
         item_list = ["Camo top", "Camo bottoms", "leather gloves", "Leather boots", "Staff of fire"]

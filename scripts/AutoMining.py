@@ -6,9 +6,11 @@ import time
 import ast
 
 from scripts.script_util.general import General
+from util.logger import SimpleLogger
 
 class AutoMining():
-    def __init__(self):
+    def __init__(self, user):
+        self.user = user
         self.plugin_name = "Auto Mining"
         self.microbot = JClass("net.runelite.client.plugins.microbot.Microbot")
         self.plugin = self.get_plugin_by_name()
@@ -30,7 +32,7 @@ class AutoMining():
     def run(self, input_dict):
         job_details = ast.literal_eval(input_dict['var1'])
         location = ast.literal_eval(input_dict['location'])
-        req_item = input_dict['req_item']
+        req_item = ast.literal_eval(input_dict['req_item'])
 
 
         self.set_equipment(req_item)
@@ -53,20 +55,27 @@ class AutoMining():
         time.sleep(3)
         return
 
-    def set_equipment(self, item):
+    def set_equipment(self, item_dict):
+        item = next(iter(item_dict))
         rs2bank = JClass("net.runelite.client.plugins.microbot.util.bank.Rs2Bank")
-        rs2bank.walkToBankAndUseBank()
-        time.sleep(3)
-        rs2bank.depositEquipment()
-        time.sleep(1)
-        rs2bank.depositAll()
-        time.sleep(2)
-        self.general.pick_tool(item)
-        time.sleep(2)
-        rs2bank.closeBank()
+        rs2inventory = JClass("net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory")
+        while True:
+            rs2bank.walkToBankAndUseBank()
+            time.sleep(3)
+            rs2bank.depositEquipment()
+            time.sleep(1)
+            rs2bank.depositAll()
+            time.sleep(2)
+            self.general.pick_tool(item_dict)
+            time.sleep(2)
+            rs2bank.closeBank()
 
-        Rs2Inventory = JClass("net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory")
-        Rs2Inventory.wield(item)
+            if rs2inventory.hasItem(item):
+                break
+            else:
+                print('trying to set item again. Item: ' + item)
+
+        rs2inventory.wield(item)
 
         ## needs to check if I can equip chosen pickaxe
     

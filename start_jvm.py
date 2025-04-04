@@ -3,29 +3,37 @@ import jpype
 from jpype import JClass
 import jpype.imports
 import time
+import sys
+
 from scripts.AutoMining import AutoMining
 from scripts.AutoFishing import AutoFishing
+from scripts.AutoCooking import AutoCooking
 from scripts.GetStats import GetStats
+from scripts.GetBank import GetBank
 from util.db import MariaDB
 from util.job_handler import Jobs
+from util.logger import SimpleLogger
 
 class jvm():
-    def __init__(self):
+    def __init__(self, user):
         self.db = MariaDB()
         self.job = Jobs()
-
+        self.user = user
+        self.logger = SimpleLogger()
 
         self.class_map = {
             "AutoMining": AutoMining,
             "GetStats": GetStats,
-            "AutoFishing": AutoFishing
+            "AutoFishing": AutoFishing,
+            "GetBank": GetBank,
+            "AutoCooking": AutoCooking
         }
         
         JAR_PATH = "/opt/microbot/microbot.jar"
         jpype.startJVM(classpath=[JAR_PATH])
         MainClass = JClass("net.runelite.client.RuneLite")
         MainClass.main([])
-        time.sleep(10)
+        time.sleep(15)
         
         self.playtime = self.get_time()
 
@@ -35,7 +43,7 @@ class jvm():
         else:
             class_name = job_dict['script']
         if class_name in self.class_map:
-            return self.class_map[class_name]()
+            return self.class_map[class_name](self.user)
         else:
             raise ValueError(f"Class name '{class_name}' is not recognized.")
 
@@ -66,6 +74,7 @@ class jvm():
 
     def runner(self):
 
+        self.db.set_user_status(self.user, 'working')
         input_dict = {
             'x': 2981,
             'y': 3234,
@@ -79,26 +88,31 @@ class jvm():
         while time.time() < t_end:
             stat_job = self.create_instance('GetStats')
             stats = stat_job.run()
+            bank_job = self.create_instance('GetBank')
+            bank_inv = bank_job.run()
             
-            job_dict = self.job.get_job(stats)
+            job_dict = self.job.get_job(stats, bank_inv)
             print(job_dict)
             job = self.create_instance(job_dict)
             
             first_loop = True
             while time.time() < time.time() + 60*60:
                 if first_loop:
+                    self.logger.info(self.user, f'Job assigned: {job_dict['script']}')
                     job.run(job_dict)
                     first_loop = False
                 self.check_dependencies()
                 time.sleep(5)
-                print('loop done')
-
+                
             job.stop()
+            self.logger.info(self.user, f'Stopping job: {job_dict['script']}')
+        
+        self.db.set_user_status(self.user, 'stopped')
 
 
 if __name__ == "__main__":
     
 
-    vm = jvm()
+    vm = jvm(sys.argv[1])
     #vm.job.get_job('st')
     vm.runner()
