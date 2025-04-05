@@ -8,10 +8,10 @@ import ast
 from scripts.script_util.general import General
 from util.logger import SimpleLogger
 
-class AutoMining():
+class AutoSmelting():
     def __init__(self, user):
         self.user = user
-        self.plugin_name = "Auto Mining"
+        self.plugin_name = "Auto Smelting"
         self.microbot = JClass("net.runelite.client.plugins.microbot.Microbot")
         self.plugin = self.get_plugin_by_name()
         self.general = General()
@@ -32,11 +32,6 @@ class AutoMining():
     def run(self, input_dict):
         job_details = ast.literal_eval(input_dict['var1'])
         location = ast.literal_eval(input_dict['location'])
-        req_item = ast.literal_eval(input_dict['req_item'])
-
-
-        self.set_equipment(req_item)
-        print('equipment set')
 
         self.walkToLocation(location['x'], location['y'], location['plane'])
        
@@ -82,15 +77,15 @@ class AutoMining():
     def plugin_config(self, job_details):
         rocks = JClass("net.runelite.client.plugins.microbot.mining.enums.Rocks")
         #microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.GOLD)
-        if job_details['ore'] == "COPPER":
+        if job_details['Bar'] == "BRONZE":
             self.microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.COPPER)
-        if job_details['ore'] == "TIN":
-            self.microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.TIN)
-        elif job_details['ore'] == "IRON":
-            self.microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.IRON)
+#        if job_details['ore'] == "TIN":
+#            self.microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.TIN)
+#        elif job_details['ore'] == "IRON":
+#            self.microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.IRON)
         
-        self.microbot.getConfigManager().setConfiguration("Mining", "DistanceToStray", job_details['stray'])
-        self.microbot.getConfigManager().setConfiguration("Mining", "UseBank", job_details['bank'])
+#        self.microbot.getConfigManager().setConfiguration("Mining", "DistanceToStray", job_details['stray'])
+#        self.microbot.getConfigManager().setConfiguration("Mining", "UseBank", job_details['bank'])
         time.sleep(5)
 
 
@@ -108,5 +103,5 @@ if __name__ == "__main__":
         'stray': 10,
         'bank': True
     }
-    mining = AutoMining()
+    mining = AutoSmelting()
     mining.run(input_dict)

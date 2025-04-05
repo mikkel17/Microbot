@@ -14,6 +14,7 @@ class GetBank():
         self.general = General()
 
         self.items = [
+            'Coins',
             'Raw shrimps',
             'Raw anchovies',
             'Anchovies',
@@ -21,7 +22,10 @@ class GetBank():
             'Iron ore',
             'pickaxe',
             ' axe',
-            'Small fishing net'
+            'Small fishing net',
+            'Tin ore',
+            'Copper ore',
+            'Bronze bar'
         ]
 
 

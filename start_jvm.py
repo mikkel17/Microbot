@@ -8,6 +8,7 @@ import sys
 from scripts.AutoMining import AutoMining
 from scripts.AutoFishing import AutoFishing
 from scripts.AutoCooking import AutoCooking
+from scripts.AutoSmelting import AutoSmelting
 from scripts.GetStats import GetStats
 from scripts.GetBank import GetBank
 from util.db import MariaDB
@@ -26,7 +27,8 @@ class jvm():
             "GetStats": GetStats,
             "AutoFishing": AutoFishing,
             "GetBank": GetBank,
-            "AutoCooking": AutoCooking
+            "AutoCooking": AutoCooking,
+            "AutoSmelting": AutoSmelting
         }
         
         JAR_PATH = "/opt/microbot/microbot.jar"
@@ -75,14 +77,7 @@ class jvm():
     def runner(self):
 
         self.db.set_user_status(self.user, 'working')
-        input_dict = {
-            'x': 2981,
-            'y': 3234,
-            'plane': 0,
-            'ore': "IRON",
-            'stray': 5,
-            'bank': True
-        }
+
         t_end = time.time() + 60 * self.playtime
 
         while time.time() < t_end:
@@ -96,7 +91,8 @@ class jvm():
             job = self.create_instance(job_dict)
             
             first_loop = True
-            while time.time() < time.time() + 60*60:
+            now = time.time()
+            while time.time() < now + 60*60:
                 if first_loop:
                     self.logger.info(self.user, f'Job assigned: {job_dict['script']}')
                     job.run(job_dict)
