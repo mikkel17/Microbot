@@ -296,6 +296,7 @@ public class Microbot {
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
+        */
         }
 
     public static void showMessage(String message, int disposeTime) {
@@ -321,7 +322,6 @@ public class Microbot {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        */
     }
 
 
