@@ -39,8 +39,25 @@ class jvm():
         jpype.startJVM(classpath=[JAR_PATH])
         MainClass = JClass("net.runelite.client.RuneLite")
         MainClass.main([])
-        time.sleep(15)
+        time.sleep(10)
+
+        self.microbot = JClass("net.runelite.client.plugins.microbot.Microbot")
         
+    def get_plugin_by_name(self, plugin_name):
+        PluginDescriptor = JClass("net.runelite.client.plugins.PluginDescriptor")
+        for plugin in self.microbot.getPluginManager().getPlugins():
+            descriptor = plugin.getClass().getAnnotation(PluginDescriptor)
+            if descriptor is not None and descriptor.name().contains(plugin_name):
+                    print(f"plugin enabled: {descriptor.name()}")
+                    return plugin
+    
+    def enable_plugin(self, plugin_name):
+        plugin = self.get_plugin_by_name(plugin_name)
+        self.microbot.getPluginManager().setPluginEnabled(plugin, True)
+        self.microbot.getPluginManager().startPlugins()
+        time.sleep(15)
+        self.microbot.getPluginManager().setPluginEnabled(plugin, False)
+        self.microbot.getPluginManager().stopPlugin(plugin)
 
     def create_instance(self, job_dict):
         if type(job_dict) == str:
@@ -91,6 +108,8 @@ class jvm():
 
     def runner(self):
         
+        self.enable_plugin('AutoLogin')
+
         self.db.set_user_status(self.user, 'working')
 
         self.play_start = time.time()
