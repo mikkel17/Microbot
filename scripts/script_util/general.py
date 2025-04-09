@@ -1,5 +1,7 @@
 from jpype import JClass
+import jpype
 import time
+
 
 class General():
     
@@ -62,7 +64,21 @@ class General():
         rs2bank = JClass("net.runelite.client.plugins.microbot.util.bank.Rs2Bank")
         items_result = {}
         while True:
-            rs2bank.walkToBank()
+
+            MAX_RETRIES = 3
+            DELAY_BETWEEN_RETRIES = 1  # seconds
+
+            for attempt in range(MAX_RETRIES):
+                try:
+                    rs2bank.walkToBank()
+                    break  # success, exit the loop
+                except jpype.JException as e:
+                    print(f"[Attempt {attempt + 1}] Java Exception: {e}")
+                    if attempt < MAX_RETRIES - 1:
+                        time.sleep(DELAY_BETWEEN_RETRIES)
+                    else:
+                        print("All retries failed. Giving up.")
+                        raise  # re-raise the last exception if all attempts fail
             time.sleep(5)
             rs2bank.openBank()
             time.sleep(1)

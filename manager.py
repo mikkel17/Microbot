@@ -2,14 +2,16 @@ from util.db import MariaDB
 from util.logger import SimpleLogger
 import time
 import subprocess
-from datetime import datetime
+from datetime import datetime, date
+import socket
 
 
 class manager():
     def __init__(self):
         self.db = MariaDB()
         self.logger = SimpleLogger()
-
+        self.jvm_capacity = 8
+        self.hostname = socket.gethostname()
 
     def start_new_jvm(self, user):
         self.logger.info('Manager', f'Starting new JVM. [\'/bin/sh\', \'start_jvm.sh\', \'{user}\']')
@@ -20,7 +22,9 @@ class manager():
         self.logger.info('Manager', f'Starting main_loop')
         prev_users = ''
         while True:
-            users = self.db.get_user_status_stopped()
+            self.db.reset_playtime(date.today())
+            available_jvm_spots = self.jvm_capacity - len(self.db.get_user_status_working(self.hostname))
+            users = self.db.get_user_status_stopped(self.hostname, available_jvm_spots)
             if users != prev_users:
                 self.logger.info('Manager', f'Users status=stopped: {users}')
             

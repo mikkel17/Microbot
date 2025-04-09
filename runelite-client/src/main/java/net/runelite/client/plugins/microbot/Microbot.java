@@ -255,7 +255,11 @@ public class Microbot {
         return false;
     }
 
+    public static String lastScriptMessage = ""; // Add this at class level (outside any methods)
+
     public static void showMessage(String message) {
+        lastScriptMessage = message; // <-- Store the message for later access
+        /*
         try {
             SwingUtilities.invokeAndWait(() ->
             {
@@ -266,6 +270,7 @@ public class Microbot {
             ex.getStackTrace();
             Microbot.log(ex.getMessage());
         }
+        */
     }
 
 

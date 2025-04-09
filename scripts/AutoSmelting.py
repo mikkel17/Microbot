@@ -75,12 +75,12 @@ class AutoSmelting():
         ## needs to check if I can equip chosen pickaxe
     
     def plugin_config(self, job_details):
-        rocks = JClass("net.runelite.client.plugins.microbot.mining.enums.Rocks")
+        bars = JClass("net.runelite.client.plugins.microbot.smelting.enums.Bars")
         #microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.GOLD)
         if job_details['Bar'] == "BRONZE":
-            self.microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.COPPER)
-#        if job_details['ore'] == "TIN":
-#            self.microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.TIN)
+            self.microbot.getConfigManager().setConfiguration("smelting", "Ore", bars.BRONZE)
+        if job_details['Bar'] == "IRON":
+            self.microbot.getConfigManager().setConfiguration("smelting", "Ore", bars.IRON)
 #        elif job_details['ore'] == "IRON":
 #            self.microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.IRON)
         
