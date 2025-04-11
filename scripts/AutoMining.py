@@ -52,7 +52,7 @@ class AutoMining():
         self.microbot.getPluginManager().setPluginEnabled(self.plugin, False)
         self.microbot.getPluginManager().stopPlugin(self.plugin)
         print('MANUAL STOP BY SCRIPT')
-        time.sleep(3)
+        time.sleep(10)
 
     def set_equipment(self, item_dict):
         item = next(iter(item_dict))

@@ -107,7 +107,8 @@ class MariaDB:
         SELECT 
         *
         FROM users
-        WHERE os_user = '{user}';
+        WHERE os_user = '{user}'
+        AND account_status = 'ready';
         '''
         return self.fetch_all(query)
 
@@ -151,7 +152,6 @@ class MariaDB:
         SET status = '{status}'
         WHERE os_user = '{user}' AND account_status = 'ready';
         '''
-        print(query)
         self.execute(query)
 
     def reset_user(self, user):
@@ -160,7 +160,6 @@ class MariaDB:
         SET status = 'stopped', played_today = 0, last_played = NULL
         WHERE os_user = '{user}';
         '''
-        print(query)
         self.execute(query)
     
     def update_time_played_today(self, user, duration, total_duration):

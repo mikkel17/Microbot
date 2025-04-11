@@ -23,9 +23,22 @@ class GoForAWalk():
                     return plugin
 
     def walkToLocation(self, x, y, plane):
-        print("start walking")
-        walker = JClass("net.runelite.client.plugins.microbot.util.walker.Rs2Walker")
-        walker.walkTo(x, y, plane)
+        MAX_RETRIES = 3
+        DELAY_BETWEEN_RETRIES = 1  # seconds
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                print("start walking")
+                walker = JClass("net.runelite.client.plugins.microbot.util.walker.Rs2Walker")
+                walker.walkTo(x, y, plane)
+            except:
+                print("GetStats failed")
+                if attempt < MAX_RETRIES - 1:
+                    time.sleep(DELAY_BETWEEN_RETRIES)
+                else:
+                    print("All retries failed. Giving up.")
+                    raise  # re-raise the last exception if all attempts fail
+
 
     def stop(self):
         print('stopping')
@@ -61,6 +74,7 @@ class GoForAWalk():
                 waypoints =+1
         
         print('MANUAL STOP BY SCRIPT')
+
 
 if __name__ == "__main__":
     JAR_PATH = "/opt/microbot/microbot.jar"

@@ -27,19 +27,25 @@ class GetStats():
         walker.walkTo(x, y, plane)
 
     def run(self):
+        MAX_RETRIES = 3
+        DELAY_BETWEEN_RETRIES = 1  # seconds
 
-        stats = self.general.get_stats()
+        for attempt in range(MAX_RETRIES):
+            try:
+                stats = self.general.get_stats()
+            
+                for k, v in stats.items():
+                    print(f"{k}: {v}")
 
-        player = JClass("net.runelite.client.plugins.microbot.util.player.Rs2Player")
+                return stats
+            except:
+                print("GetStats failed")
+                if attempt < MAX_RETRIES - 1:
+                    time.sleep(DELAY_BETWEEN_RETRIES)
+                else:
+                    print("All retries failed. Giving up.")
+                    raise  # re-raise the last exception if all attempts fail
 
-        rocks = JClass("net.runelite.client.plugins.microbot.mining.enums.Rocks")
-        
-
-
-
-
-        for k, v in stats.items():
-            print(f"{k}: {v}")
 
 
 
@@ -83,7 +89,6 @@ class GetStats():
             time.sleep(2)
         '''
         
-        return stats
 
         #microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.GOLD)
 

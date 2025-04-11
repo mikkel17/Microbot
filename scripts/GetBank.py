@@ -43,12 +43,25 @@ class GetBank():
         walker.walkTo(x, y, plane)
 
     def run(self):
-        bank_inv = self.general.get_bank_items(self.items)
-        
-        for k, v in bank_inv.items():
-            print(f"{k}: {v}")
-        
-        return bank_inv
+        MAX_RETRIES = 3
+        DELAY_BETWEEN_RETRIES = 1  # seconds
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                bank_inv = self.general.get_bank_items(self.items)
+                
+                for k, v in bank_inv.items():
+                    print(f"{k}: {v}")
+                
+                return bank_inv
+
+            except:
+                print("GetBank failed")
+                if attempt < MAX_RETRIES - 1:
+                    time.sleep(DELAY_BETWEEN_RETRIES)
+                else:
+                    print("All retries failed. Giving up.")
+                    raise  # re-raise the last exception if all attempts fail
 
 
 if __name__ == "__main__":

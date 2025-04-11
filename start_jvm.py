@@ -6,10 +6,11 @@ import time
 import sys
 import random
 
-from scripts.AutoMining import AutoMining
+from scripts.AutoCombat import AutoCombat
 from scripts.AutoFishing import AutoFishing
 from scripts.AutoCooking import AutoCooking
 from scripts.AutoSmelting import AutoSmelting
+from scripts.AutoMining import AutoMining 
 from scripts.GetStats import GetStats
 from scripts.GetBank import GetBank
 from scripts.GoForAWalk import GoForAWalk
@@ -32,7 +33,8 @@ class jvm():
             "GetBank": GetBank,
             "AutoCooking": AutoCooking,
             "AutoSmelting": AutoSmelting,
-            "GoForAWalk": GoForAWalk
+            "GoForAWalk": GoForAWalk,
+            "AutoCombat": AutoCombat
         }
         
         JAR_PATH = "/opt/microbot/microbot.jar"
@@ -80,7 +82,10 @@ class jvm():
 
     def stop_jvm(self, job_dict):
         rs2player = JClass('net.runelite.client.plugins.microbot.util.player.Rs2Player')
-        rs2player.logout()
+        try:
+            rs2player.logout()
+        except:
+            pass
         self.logger.info(self.user, f'Stopping job: {job_dict['script']}')
 
         self.play_end = time.time()
@@ -104,7 +109,7 @@ class jvm():
             return 23
         else:
             self.db.update_playtime(3600*1, self.user_dict['osrs_user'])
-            return 15
+            return 3
 
     def runner(self):
         

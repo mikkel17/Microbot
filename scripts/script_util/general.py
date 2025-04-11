@@ -120,3 +120,44 @@ class General():
                 return axe
         
         return 'No tool found' #### IF NO TOOL FOUND, CALL TO BUY ONE!
+
+    def pick_equipment(self):
+        stats = self.get_stats()
+        rs2bank = JClass("net.runelite.client.plugins.microbot.util.bank.Rs2Bank")
+        armor_dict = {
+            'helmet': ['full helm', 'med helm'],
+            'body': ['platebody', 'chainbody'],
+            'legs': ['platelegs', 'plateskirts'],
+            'shield': ['kiteshield', 'sq shield'],
+            'weapon': ['scimitar', 'longsword', 'sword', 'dagger']
+        }
+        equipment = []
+        for category, items in armor_dict.items():
+            if category == 'weapon':
+                skill = 'Attack'
+            else:
+                skill = 'Defence'
+            
+            skill_reqs = {
+                'rune': 40,
+                'adamant': 30,
+                'mithril': 20,
+                'steel': 5,
+                'iron': 1,
+                'bronze': 1
+            }
+            item_found = False
+            for item in items:
+                if item_found == True:
+                    break
+                for metal, lvl in skill_reqs.items():
+                    full_item_name = f'{metal} {item}'
+                    if stats[skill] >= lvl and rs2bank.hasBankItem(JClass("java.lang.String")(full_item_name)):
+                        rs2bank.withdrawItem(full_item_name)
+                        item_found = True
+                        equipment.append(full_item_name)
+                        break
+                    else:
+                        continue
+
+        return equipment
