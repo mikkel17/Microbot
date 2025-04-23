@@ -8,8 +8,8 @@ class Jobs():
 
         self.skill_goals = {
             "Attack": 50,
-            "Strength": 50,
-            "Defence": 50,
+            "Strength": 60,
+            "Defence": 40,
             "Ranged": 50,
             "Prayer": 50,
             "Magic": 50,
@@ -100,6 +100,7 @@ class Jobs():
             if result_skill and result_item:
                 return job_being_checked, True
             elif result_skill and not result_item:
+                print(f'{doable_jobs}')
                 for job in doable_jobs:
                     for output_item in job['output_item'].split(','):
                         if output_item == failing_item:
@@ -107,12 +108,14 @@ class Jobs():
                         else:
                             continue
                 for job in self.db.get_skill_job_types():
+                    print(f'{job}')
                     for output_item in job['output_item'].split(','):
                         if output_item == failing_item:
                             return job, False
                         else:
                             continue
             elif not result_skill and result_item:
+                print(f"result_skill: {result_skill}, result_item: {result_item}")
                 for job in doable_jobs:
                     for output_skill in job['output_skill'].split(','):
                         if output_skill == failing_skill:

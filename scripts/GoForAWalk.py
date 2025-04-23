@@ -22,29 +22,11 @@ class GoForAWalk():
                     print(f"plugin enabled: {descriptor.name()}")
                     return plugin
 
-    def walkToLocation(self, x, y, plane):
-        MAX_RETRIES = 3
-        DELAY_BETWEEN_RETRIES = 1  # seconds
-
-        for attempt in range(MAX_RETRIES):
-            try:
-                print("start walking")
-                walker = JClass("net.runelite.client.plugins.microbot.util.walker.Rs2Walker")
-                walker.walkTo(x, y, plane)
-            except:
-                print("GetStats failed")
-                if attempt < MAX_RETRIES - 1:
-                    time.sleep(DELAY_BETWEEN_RETRIES)
-                else:
-                    print("All retries failed. Giving up.")
-                    raise  # re-raise the last exception if all attempts fail
-
-
     def stop(self):
-        print('stopping')
+        print('MANUAL STOP BY SCRIPT')
 
     def run(self, job_dict):
-
+        self.set_equipment()
         coordinates = [
              [2973, 3316, 0],
              [2933, 3292, 0],
@@ -63,17 +45,30 @@ class GoForAWalk():
              [3284,3470, 0]
         ]
         random.shuffle(coordinates)
-        waypoints = 0
-        for coord in coordinates:
-            self.walkToLocation(coord[0], coord[1], coord[2])
-            time.sleep(5)
-            print(waypoints)
-            if waypoints >= 3:
-                break
-            else:
-                waypoints =+1
+        for coord in coordinates[:3]:
+            self.general.walkToLocation(coord[0], coord[1], coord[2])
+            time.sleep(60*3)
         
-        print('MANUAL STOP BY SCRIPT')
+    def set_equipment(self):
+        
+        rs2bank = JClass("net.runelite.client.plugins.microbot.util.bank.Rs2Bank")
+        rs2inventory = JClass("net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory")
+        while True:
+            rs2bank.walkToBankAndUseBank()
+            time.sleep(3)
+            rs2bank.depositEquipment()
+            time.sleep(1)
+            rs2bank.depositAll()
+            time.sleep(2)
+            equipment = self.general.pick_equipment()
+            time.sleep(2)
+            rs2bank.closeBank()
+
+            if len(equipment) > 0:
+                break
+
+        for item in equipment:
+            rs2inventory.wield(item)
 
 
 if __name__ == "__main__":

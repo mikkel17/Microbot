@@ -108,7 +108,7 @@ class MariaDB:
         *
         FROM users
         WHERE os_user = '{user}'
-        AND account_status = 'ready';
+        AND (account_status = 'ready' or account_status = 'trial');
         '''
         return self.fetch_all(query)
 
@@ -118,7 +118,7 @@ class MariaDB:
         *
         FROM users
         WHERE host = '{host}' 
-        AND account_status = 'ready' 
+        AND (account_status = 'ready' OR account_status = 'trial')
         AND status = 'working';
         '''
         return self.fetch_all(query)
@@ -130,7 +130,7 @@ class MariaDB:
         *
         FROM users
         WHERE host = '{host}' 
-        AND account_status = 'ready' 
+        AND (account_status = 'ready' OR account_status = 'trial')
         AND status = 'stopped' 
         AND played_today < playtime 
         AND (last_played IS NULL OR last_played < DATE_SUB('{now}', INTERVAL 15 MINUTE))
@@ -150,7 +150,32 @@ class MariaDB:
         query = f'''
         UPDATE users
         SET status = '{status}'
-        WHERE os_user = '{user}' AND account_status = 'ready';
+        WHERE osrs_user = '{user}' AND (account_status = 'ready' OR account_status = 'trial');
+        '''
+        self.execute(query)
+
+    def set_account_status(self, user, status):
+        query = f'''
+        UPDATE users
+        SET account_status = '{status}'
+        WHERE osrs_user = '{user}';
+        '''
+        self.execute(query)
+
+    def upgrade_accounts_to_ready(self):
+        query = f'''
+        UPDATE users
+        SET account_status = 'ready'
+        WHERE total_playtime > 72000 AND account_status = 'trial';
+        '''
+        self.execute(query)
+
+    def upgrade_accounts_to_trial(self):
+        query = f'''
+        UPDATE users
+        SET account_status = 'trial'
+        WHERE account_status = 'soon'
+        AND last_reset >= DATE_ADD(creation_date, INTERVAL 5 DAY);
         '''
         self.execute(query)
 
@@ -175,6 +200,14 @@ class MariaDB:
         query = f'''
         UPDATE users
         SET playtime = '{seconds}'
+        WHERE osrs_user = '{osrs_user}';
+        '''
+        self.execute(query)
+    
+    def update_exp(self, osrs_user, total, earned):
+        query = f'''
+        UPDATE users
+        SET exp_total = '{total}', exp_latest = '{earned}'
         WHERE osrs_user = '{osrs_user}';
         '''
         self.execute(query)

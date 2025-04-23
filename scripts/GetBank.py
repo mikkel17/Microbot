@@ -25,7 +25,8 @@ class GetBank():
             'Small fishing net',
             'Tin ore',
             'Copper ore',
-            'Bronze bar'
+            'Bronze bar',
+            'Iron bar'
         ]
 
 
@@ -36,11 +37,6 @@ class GetBank():
             if descriptor is not None and descriptor.name().contains(self.plugin_name):
                     print(f"plugin enabled: {descriptor.name()}")
                     return plugin
-
-    def walkToLocation(self, x, y, plane):
-        print("start walking")
-        walker = JClass("net.runelite.client.plugins.microbot.util.walker.Rs2Walker")
-        walker.walkTo(x, y, plane)
 
     def run(self):
         MAX_RETRIES = 3

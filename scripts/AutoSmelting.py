@@ -24,16 +24,11 @@ class AutoSmelting():
                     print(f"plugin enabled: {descriptor.name()}")
                     return plugin
 
-    def walkToLocation(self, x, y, plane):
-        print("start walking")
-        walker = JClass("net.runelite.client.plugins.microbot.util.walker.Rs2Walker")
-        walker.walkTo(x, y, plane)
-
     def run(self, input_dict):
         job_details = ast.literal_eval(input_dict['var1'])
         location = ast.literal_eval(input_dict['location'])
 
-        self.walkToLocation(location['x'], location['y'], location['plane'])
+        self.general.walkToLocation(location['x'], location['y'], location['plane'])
        
 
         self.plugin_config(job_details)
@@ -44,10 +39,9 @@ class AutoSmelting():
         self.microbot.getPluginManager().startPlugins()
         
     def stop(self):
-        self.microbot.getPluginManager().setPluginEnabled(self.plugin, False)
-        self.microbot.getPluginManager().stopPlugin(self.plugin)
+        self.general.disable_all_plugins()
         print('MANUAL STOP BY SCRIPT')
-        time.sleep(3)
+        time.sleep(10)
         return
 
     def set_equipment(self, item_dict):
@@ -77,10 +71,11 @@ class AutoSmelting():
     def plugin_config(self, job_details):
         bars = JClass("net.runelite.client.plugins.microbot.smelting.enums.Bars")
         #microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.GOLD)
+        config_group = "Smithing"
         if job_details['Bar'] == "BRONZE":
-            self.microbot.getConfigManager().setConfiguration("smelting", "Ore", bars.BRONZE)
+            self.microbot.getConfigManager().setConfiguration(config_group, "Bar", bars.BRONZE)
         if job_details['Bar'] == "IRON":
-            self.microbot.getConfigManager().setConfiguration("smelting", "Ore", bars.IRON)
+            self.microbot.getConfigManager().setConfiguration(config_group, "Bar", bars.IRON)
 #        elif job_details['ore'] == "IRON":
 #            self.microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.IRON)
         

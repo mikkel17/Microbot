@@ -5,6 +5,9 @@ import time
 
 class General():
     
+    def __init__(self):
+        self.microbot = JClass("net.runelite.client.plugins.microbot.Microbot")
+
     def get_stats(self):
         Skill = JClass("net.runelite.api.Skill")
         microbot = JClass("net.runelite.client.plugins.microbot.Microbot")
@@ -59,6 +62,9 @@ class General():
         }
 
         return stats
+    
+    def get_total_exp(self):
+        return int(self.microbot.getClient().getOverallExperience())
     
     def get_bank_items(self, items):
         rs2bank = JClass("net.runelite.client.plugins.microbot.util.bank.Rs2Bank")
@@ -128,7 +134,7 @@ class General():
             'helmet': ['full helm', 'med helm'],
             'body': ['platebody', 'chainbody'],
             'legs': ['platelegs', 'plateskirts'],
-            'shield': ['kiteshield', 'sq shield'],
+            'shield': ['kiteshield', 'sq shield', 'shield'],
             'weapon': ['scimitar', 'longsword', 'sword', 'dagger']
         }
         equipment = []
@@ -144,7 +150,8 @@ class General():
                 'mithril': 20,
                 'steel': 5,
                 'iron': 1,
-                'bronze': 1
+                'bronze': 1,
+                'wooden': 1
             }
             item_found = False
             for item in items:
@@ -161,3 +168,72 @@ class General():
                         continue
 
         return equipment
+
+    def disable_all_plugins(self):
+        PluginDescriptor = JClass("net.runelite.client.plugins.PluginDescriptor")
+        for plugin in self.microbot.getPluginManager().getPlugins():
+            if str(plugin).startswith('net.runelite.client.plugins.microbot'):
+                descriptor = plugin.getClass().getAnnotation(PluginDescriptor)
+                if descriptor is not None and not descriptor.name().contains('MInventory Setups') and not descriptor.name().contains('Web Walker') and not descriptor.name().contains('Microbot'):
+                    self.stop(descriptor.name())
+
+    def login(self):
+        self.enable_plugin('AutoLogin')
+        time.sleep(20)
+        self.stop('AutoLogin')
+
+    def enable_plugin(self, plugin_name):
+        plugin = self.get_plugin_by_name(plugin_name)
+        self.microbot.getPluginManager().setPluginEnabled(plugin, True)
+        self.microbot.getPluginManager().startPlugins()
+        
+    def stop(self, plugin_name):
+        plugin = self.get_plugin_by_name(plugin_name)
+        self.microbot.getPluginManager().setPluginEnabled(plugin, False)
+        self.microbot.getPluginManager().stopPlugin(plugin)
+
+    def get_plugin_by_name(self, plugin_name):
+        PluginDescriptor = JClass("net.runelite.client.plugins.PluginDescriptor")
+        for plugin in self.microbot.getPluginManager().getPlugins():
+            descriptor = plugin.getClass().getAnnotation(PluginDescriptor)
+            if descriptor is not None and descriptor.name().contains(plugin_name):
+                return plugin
+    
+    def configure_WebWalker(self):
+        config = {
+            'avoidWilderness': True,
+            'useAgilityShortcuts': False,
+            'useGrappleShortcuts': False,
+            'useBoats': False,
+            'useCanoes': False,
+            'useCharterShips': False,
+            'useShips': True,
+            'useFairyRings': False,
+            'useGnomeGliders': False,
+            'useMinecarts': False,
+            'useSpiritTrees': False,
+            'useWildernessObelisks': False,
+            'useNpcs': False,
+            'useQuetzals': False,
+            'useMagicCarpets': False,
+            'cancelInstead': False
+        }
+
+        config_group = "shortestpath"
+        for k, v in config.items():
+            self.microbot.getConfigManager().setConfiguration(config_group, k, v)
+    
+    def walkToLocation(self, x, y, plane):
+        walker = JClass("net.runelite.client.plugins.microbot.util.walker.Rs2Walker")
+        retries = 0
+        while True:
+            walker.walkTo(x, y, plane)
+            if self.microbot.lastScriptMessage != "WebWalker troubles":
+                break
+            elif retries >= 10:
+                self.microbot.lastScriptMessage = "Walker is breaking hard"
+                break
+            else:
+                retries += 1
+                print('TRYING AGAIN and resetting lastScriptMessage')
+                self.microbot.lastScriptMessage = ""

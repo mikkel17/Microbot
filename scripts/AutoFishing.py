@@ -25,12 +25,8 @@ class AutoFishing():
                     print(f"plugin enabled: {descriptor.name()}")
                     return plugin
 
-    def walkToLocation(self, x, y, plane):
-        print("start walking")
-        walker = JClass("net.runelite.client.plugins.microbot.util.walker.Rs2Walker")
-        walker.walkTo(x, y, plane)
-
     def run(self, input_dict):
+
         job_details = ast.literal_eval(input_dict['var1'])
         location = ast.literal_eval(input_dict['location'])
         req_item = ast.literal_eval(input_dict['req_item'])
@@ -38,7 +34,7 @@ class AutoFishing():
         self.set_equipment(req_item)
         print('equipment set')
 
-        self.walkToLocation(location['x'], location['y'], location['plane'])
+        self.general.walkToLocation(location['x'], location['y'], location['plane'])
        
 
         self.plugin_config(job_details)
@@ -49,11 +45,9 @@ class AutoFishing():
         self.microbot.getPluginManager().startPlugins()
         
     def stop(self):
-        self.microbot.getPluginManager().setPluginEnabled(self.plugin, False)
-        self.microbot.getPluginManager().stopPlugin(self.plugin)
+        self.general.disable_all_plugins()
         print('MANUAL STOP BY SCRIPT')
-        time.sleep(3)
-        return
+        time.sleep(10)
 
     def set_equipment(self, item_dict):
         item = next(iter(item_dict))
@@ -86,10 +80,11 @@ class AutoFishing():
     def plugin_config(self, job_details):
         fish = JClass("net.runelite.client.plugins.microbot.nateplugins.skilling.natefishing.enums.Fish")
         #microbot.getConfigManager().setConfiguration("Mining", "Ore", rocks.GOLD)
+        config_group = "micro-fishing"
 
         if job_details['fish'] == "shrimp":
-            self.microbot.getConfigManager().setConfiguration("Fishing", "Fish", fish.SHRIMP)
-        self.microbot.getConfigManager().setConfiguration("Fishing", "UseBank", job_details['bank'])
+            self.microbot.getConfigManager().setConfiguration(config_group, "Fish", fish.SHRIMP)
+        self.microbot.getConfigManager().setConfiguration(config_group, "UseBank", job_details['bank'])
         time.sleep(5)
 
 

@@ -155,6 +155,7 @@ public class Rs2Walker {
                 boolean isInit = sleepUntilTrue(() -> ShortestPathPlugin.getPathfinder() != null, 100, 2000);
                 if (!isInit) {
                     Microbot.log("Pathfinder took to long to initialize, exiting walker: 140");
+                    Microbot.showMessage("WebWalker troubles");
                     setTarget(null);
                     return WalkerState.EXIT;
                 }

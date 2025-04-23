@@ -13,6 +13,7 @@ from scripts.AutoSmelting import AutoSmelting
 from scripts.AutoMining import AutoMining 
 from scripts.GetStats import GetStats
 from scripts.GetBank import GetBank
+from scripts.script_util.general import General
 from scripts.GoForAWalk import GoForAWalk
 from util.db import MariaDB
 from util.job_handler import Jobs
@@ -25,6 +26,7 @@ class jvm():
         self.user = user
         self.user_dict = self.db.get_user(self.user)[0]
         self.logger = SimpleLogger()
+
 
         self.class_map = {
             "AutoMining": AutoMining,
@@ -44,22 +46,7 @@ class jvm():
         time.sleep(10)
 
         self.microbot = JClass("net.runelite.client.plugins.microbot.Microbot")
-        
-    def get_plugin_by_name(self, plugin_name):
-        PluginDescriptor = JClass("net.runelite.client.plugins.PluginDescriptor")
-        for plugin in self.microbot.getPluginManager().getPlugins():
-            descriptor = plugin.getClass().getAnnotation(PluginDescriptor)
-            if descriptor is not None and descriptor.name().contains(plugin_name):
-                    print(f"plugin enabled: {descriptor.name()}")
-                    return plugin
-    
-    def enable_plugin(self, plugin_name):
-        plugin = self.get_plugin_by_name(plugin_name)
-        self.microbot.getPluginManager().setPluginEnabled(plugin, True)
-        self.microbot.getPluginManager().startPlugins()
-        time.sleep(15)
-        self.microbot.getPluginManager().setPluginEnabled(plugin, False)
-        self.microbot.getPluginManager().stopPlugin(plugin)
+        self.general = General()
 
     def create_instance(self, job_dict):
         if type(job_dict) == str:
@@ -71,29 +58,47 @@ class jvm():
         else:
             raise ValueError(f"Class name '{class_name}' is not recognized.")
 
-    def check_dependencies(self):
+    def check_dependencies(self, job_dict):
         Microbot = JClass('net.runelite.client.plugins.microbot.Microbot')
         if Microbot.lastScriptMessage == "":
+            return True
+        elif Microbot.lastScriptMessage == "WebWalker troubles":
+            self.db.info(self.user, f'WebWalker troubles - trying again. Script: {job_dict['script']}')
             return True
         else:
             self.logger.info(self.user, f'showMessage: {Microbot.lastScriptMessage}')
             print(Microbot.lastScriptMessage)
             return False
+    
+    def logged_in(self):
+        if self.microbot.isLoggedIn():
+            return True
+        else:
+            time.slee(60)
+            if self.microbot.isLoggedIn():
+                return True
+            else:
+                return False
 
+        
     def stop_jvm(self, job_dict):
+        exp_total = self.general.get_total_exp()
+        exp_earned = exp_total - self.exp_before
+        self.db.update_exp(self.user_dict['osrs_user'], exp_total, exp_earned)
+
         rs2player = JClass('net.runelite.client.plugins.microbot.util.player.Rs2Player')
         try:
             rs2player.logout()
         except:
             pass
-        self.logger.info(self.user, f'Stopping job: {job_dict['script']}')
+        self.logger.info(self.user, f'Stopping job: {job_dict['script']}. Exp earned: {exp_earned}')
 
         self.play_end = time.time()
         self.duration = int(self.play_end - self.play_start)
         total_playtime_today = int(self.user_dict['played_today']) + self.duration
         total_playtime = int(self.user_dict['total_playtime']) + self.duration
         self.db.update_time_played_today(self.user_dict['osrs_user'], total_playtime_today, total_playtime)
-        self.db.set_user_status(self.user, 'stopped')
+        self.db.set_user_status(self.user_dict['osrs_user'], 'stopped')
         time.sleep(3)
         java.lang.System.exit(0)
 
@@ -109,13 +114,22 @@ class jvm():
             return 23
         else:
             self.db.update_playtime(3600*1, self.user_dict['osrs_user'])
-            return 3
+            return 15
+
+    def total_playtime_check(self):
+        if self.user_dict['account_status'] == "trial" and self.user_dict['total_playtime'] >= 60*60*20:
+            self.db.set_account_status(self.user_dict['osrs_user'], 'ready')
+            self.logger.info(self.user, f'{self.user_dict['osrs_user']} out of trial and ready')
+
 
     def runner(self):
-        
-        self.enable_plugin('AutoLogin')
 
-        self.db.set_user_status(self.user, 'working')
+        self.general.disable_all_plugins()
+        self.general.login()
+        self.general.configure_WebWalker()
+        self.exp_before = self.general.get_total_exp()
+
+        self.db.set_user_status(self.user_dict['osrs_user'], 'working')
 
         self.play_start = time.time()
 
@@ -123,25 +137,40 @@ class jvm():
         session_time = self.get_session_time(stats)
         bank_inv = self.create_instance('GetBank').run()
         
-        job_dict = self.job.get_job(stats, bank_inv)
-        print(job_dict)
-        if random.random() <= 0.2:
+        if random.random() <= 0.1:
             job = self.create_instance('GoForAWalk')
+            walking = True
+            job_dict = {'script': 'GoForAWalk'}
+            print(job_dict)
+        elif self.user_dict['account_status'] == 'trial':
+            job = self.create_instance('GoForAWalk')
+            walking = True
+            job_dict = {'script': 'GoForAWalk'}
+            print(job_dict)
         else:
+            job_dict = self.job.get_job(stats, bank_inv)
+            print(job_dict)
             job = self.create_instance(job_dict)
+            walking = False
         
         first_loop = True
         now = time.time()
         print(f'Session time: {session_time} minutes')
         while time.time() < now + session_time*60:
-            if first_loop:
+            if walking:
+                self.logger.info(self.user, f'Job assigned: "GoForAWalk"')
+                job.run(job_dict)
+                break
+            elif first_loop:
                 self.logger.info(self.user, f'Job assigned: {job_dict['script']}')
                 job.run(job_dict)
                 first_loop = False
-            if self.check_dependencies():
-                pass
-            else:
+
+            if not self.check_dependencies(job_dict):
                 break
+            if not self.logged_in():
+                break
+            
             time.sleep(5)
             
         job.stop()
