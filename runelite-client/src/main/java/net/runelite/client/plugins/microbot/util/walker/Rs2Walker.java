@@ -357,9 +357,7 @@ public class Rs2Walker {
                 setTarget(null);
                 return WalkerState.EXIT;
             }
-            ex.printStackTrace(System.out);
-            Microbot.log("Microbot Walker Exception " + ex.getMessage());
-            System.out.println(ex.getMessage());
+            Microbot.logStackTrace("Rs2Walker", ex);
         }
         return WalkerState.EXIT;
     }
@@ -1402,6 +1400,11 @@ public static List<WorldPoint> getWalkPath(WorldPoint target) {
             Rs2Dialogue.sleepUntilInDialogue();
             Rs2Dialogue.clickOption("yes");
             return true;
+        }
+        
+        // Handle Cave Entrance inside of Asgarnia Ice Caves
+        if (tileObject.getId() == ObjectID.TUNNEL_55988 || tileObject.getId() == ObjectID.TUNNEL_55989) {
+            Rs2Player.waitForAnimation();
         }
         return false;
     }

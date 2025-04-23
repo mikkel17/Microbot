@@ -1182,7 +1182,7 @@ public class Rs2Bank {
             }
             return action;
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            Microbot.logStackTrace("Rs2Bank", ex);
         }
         return false;
     }
@@ -1205,7 +1205,7 @@ public class Rs2Bank {
             sleep(Rs2Random.randomGaussian(800,200));
             return true;
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            Microbot.logStackTrace("Rs2Bank", ex);
         }
         return false;
     }
@@ -1239,7 +1239,7 @@ public class Rs2Bank {
             sleep(Rs2Random.randomGaussian(800,200));
             return true;
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            Microbot.logStackTrace("Rs2Bank", ex);
         }
         return false;
     }
@@ -1463,6 +1463,16 @@ public class Rs2Bank {
         BankLocation bestBank = null;
         int shortestPath = Integer.MAX_VALUE;
 
+        /**
+         * Handle Exception for Corsair Cove
+         */
+        var corsaireCoveBank = handleCorsairCoveException(banks);
+
+        if (corsaireCoveBank != null) {
+            return corsaireCoveBank;
+        }
+
+
         for (BankLocation bank : banks) {
             int closestDistance = Rs2WorldPoint.quickDistance(bank.getWorldPoint(), worldPoint);
             if (closestDistance < shortestPath) {
@@ -1472,6 +1482,17 @@ public class Rs2Bank {
         }
 
         return bestBank;
+    }
+
+    private static BankLocation handleCorsairCoveException(List<BankLocation> banks) {
+        int[] corsaireCoveCaveRegion = new int[] {7564, 7820, 8076, 8332, 7821, 8077};
+
+        for (int regionId: corsaireCoveCaveRegion) {
+            if (Rs2Player.getWorldLocation().getRegionID() == regionId && banks.contains(BankLocation.CORSAIR_COVE)) {
+                return BankLocation.CORSAIR_COVE;
+            }
+        }
+        return null;
     }
 
     /**
