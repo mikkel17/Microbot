@@ -10,6 +10,7 @@ from scripts.AutoCombat import AutoCombat
 from scripts.AutoFishing import AutoFishing
 from scripts.AutoCooking import AutoCooking
 from scripts.AutoSmelting import AutoSmelting
+from scripts.AutoSmtihing import AutoSmithing
 from scripts.AutoMining import AutoMining 
 from scripts.GetStats import GetStats
 from scripts.GetBank import GetBank
@@ -36,7 +37,8 @@ class jvm():
             "AutoCooking": AutoCooking,
             "AutoSmelting": AutoSmelting,
             "GoForAWalk": GoForAWalk,
-            "AutoCombat": AutoCombat
+            "AutoCombat": AutoCombat,
+            "AutoSmithing": AutoSmithing
         }
         
         JAR_PATH = "/opt/microbot/microbot.jar"
@@ -123,59 +125,62 @@ class jvm():
 
 
     def runner(self):
+        try:
+            self.general.disable_all_plugins()
+            self.general.login()
+            self.general.configure_WebWalker()
+            self.exp_before = self.general.get_total_exp()
 
-        self.general.disable_all_plugins()
-        self.general.login()
-        self.general.configure_WebWalker()
-        self.exp_before = self.general.get_total_exp()
+            self.db.set_user_status(self.user_dict['osrs_user'], 'working')
 
-        self.db.set_user_status(self.user_dict['osrs_user'], 'working')
+            self.play_start = time.time()
 
-        self.play_start = time.time()
-
-        stats = self.create_instance('GetStats').run()
-        session_time = self.get_session_time(stats)
-        bank_inv = self.create_instance('GetBank').run()
-        
-        if random.random() <= 0.1:
-            job = self.create_instance('GoForAWalk')
-            walking = True
-            job_dict = {'script': 'GoForAWalk'}
-            print(job_dict)
-        elif self.user_dict['account_status'] == 'trial':
-            job = self.create_instance('GoForAWalk')
-            walking = True
-            job_dict = {'script': 'GoForAWalk'}
-            print(job_dict)
-        else:
-            job_dict = self.job.get_job(stats, bank_inv)
-            print(job_dict)
-            job = self.create_instance(job_dict)
-            walking = False
-        
-        first_loop = True
-        now = time.time()
-        print(f'Session time: {session_time} minutes')
-        while time.time() < now + session_time*60:
-            if walking:
-                self.logger.info(self.user, f'Job assigned: "GoForAWalk"')
-                job.run(job_dict)
-                break
-            elif first_loop:
-                self.logger.info(self.user, f'Job assigned: {job_dict['script']}')
-                job.run(job_dict)
-                first_loop = False
-
-            if not self.check_dependencies(job_dict):
-                break
-            if not self.logged_in():
-                break
+            stats = self.create_instance('GetStats').run()
+            session_time = self.get_session_time(stats)
+            bank_inv = self.create_instance('GetBank').run()
             
-            time.sleep(5)
+            if random.random() <= 0.1:
+                job = self.create_instance('GoForAWalk')
+                walking = True
+                job_dict = {'script': 'GoForAWalk'}
+                print(job_dict)
+            elif self.user_dict['account_status'] == 'trial':
+                job = self.create_instance('GoForAWalk')
+                walking = True
+                job_dict = {'script': 'GoForAWalk'}
+                print(job_dict)
+            else:
+                job_dict = self.job.get_job(stats, bank_inv)
+                print(job_dict)
+                job = self.create_instance(job_dict)
+                walking = False
             
-        job.stop()
-        self.stop_jvm(job_dict)
+            first_loop = True
+            now = time.time()
+            print(f'Session time: {session_time} minutes')
+            while time.time() < now + session_time*60:
+                if walking:
+                    self.logger.info(self.user, f'Job assigned: "GoForAWalk"')
+                    job.run(job_dict)
+                    break
+                elif first_loop:
+                    self.logger.info(self.user, f'Job assigned: {job_dict['script']}')
+                    job.run(job_dict)
+                    first_loop = False
 
+                if not self.check_dependencies(job_dict):
+                    break
+                if not self.logged_in():
+                    break
+                
+                time.sleep(5)
+                
+            job.stop()
+            self.stop_jvm(job_dict)
+        except Exception as e:
+            self.logger.info(self.user, f'An exception happened: \n {e}')
+            job.stop()
+            self.stop_jvm(job_dict)
 
 if __name__ == "__main__":
     

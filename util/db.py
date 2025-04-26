@@ -175,7 +175,7 @@ class MariaDB:
         UPDATE users
         SET account_status = 'trial'
         WHERE account_status = 'soon'
-        AND last_reset >= DATE_ADD(creation_date, INTERVAL 5 DAY);
+        AND last_reset >= DATE_ADD(creation_date, INTERVAL 3 DAY);
         '''
         self.execute(query)
 

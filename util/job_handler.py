@@ -5,11 +5,11 @@ import ast
 class Jobs():
     def __init__(self):
         self.db = MariaDB()
-
+        
         self.skill_goals = {
-            "Attack": 50,
-            "Strength": 60,
-            "Defence": 40,
+            "Attack": 40,
+            "Strength": 40,
+            "Defence": 30,
             "Ranged": 50,
             "Prayer": 50,
             "Magic": 50,
@@ -17,7 +17,7 @@ class Jobs():
             "Hitpoints": 50,
             "Crafting": 50,
             "Mining": 50,
-            "Smithing": 50,
+            "Smithing": 99,
             "Fishing": 50,
             "Cooking": 50,
             "Firemaking": 50,
@@ -31,6 +31,34 @@ class Jobs():
             "Construction": 1,
             "Hunter": 1
         }
+        
+
+        ## TESTING GOALS
+        '''self.skill_goals = {
+            "Attack": 1,
+            "Strength": 1,
+            "Defence": 1,
+            "Ranged": 1,
+            "Prayer": 1,
+            "Magic": 1,
+            "Runecraft": 1,
+            "Hitpoints": 1,
+            "Crafting": 1,
+            "Mining": 1,
+            "Smithing": 99,
+            "Fishing": 1,
+            "Cooking": 1,
+            "Firemaking": 1,
+            "Woodcutting": 1,
+            "Agility": 1,
+            "Herblore": 1,
+            "Thieving": 1,
+            "Fletching": 1,
+            "Slayer": 1,
+            "Farming": 1,
+            "Construction": 1,
+            "Hunter": 1
+        }'''
     
         self.combat_type = ['Attack', 'Defence', 'Hitpoints', 'Magic', 'Prayer', 'Ranged', 'Strength']
         self.gathering_type = ['Farming', 'Fishing', 'Hunter', 'Mining', 'Woodcutting']
