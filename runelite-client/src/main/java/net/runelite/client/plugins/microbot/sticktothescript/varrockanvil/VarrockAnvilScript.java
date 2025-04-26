@@ -231,6 +231,13 @@ public class VarrockAnvilScript extends Script {
                 Microbot.showMessage("Could not find bars in bank.");
                 shutdown();
             }
+            
+            // Exit if we withdrew too few bars from bank.
+            if (Rs2Inventory.count(barType.getId()) < 5) {
+                debug("Too few bars in bank");
+                Microbot.showMessage("Too few bars in bank.");
+                shutdown();
+            }
             sleep(180, 540);
             Rs2Bank.closeBank();
         }
@@ -247,3 +254,16 @@ public class VarrockAnvilScript extends Script {
         Rs2Antiban.resetAntibanSettings();
     }
 }
+
+
+
+    /**
+     * Counts the number of items in the inventory that match the specified ID.
+     *
+     * @param id The ID to match.
+     *
+     * @return The count of items that match the ID.
+     */
+    public static int count(int id) {
+        return (int) items().stream().filter(x -> x.id == id).count();
+    }
