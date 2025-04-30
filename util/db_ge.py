@@ -79,7 +79,7 @@ class MariaDB_ge:
         ge_offers
         (osrs_user, offer, item, quantity, state, bid, time_orginal_bid, time_update_bid)
         VALUES
-        ('{osrs_user}', 'BUY', '{item}', {quantity}, 'waiting', {price}, '{now}', '{now}')
+        ('{osrs_user}', 'BUY', '{item}', {quantity}, 'request', {price}, '{now}', '{now}');
         '''
         self.execute(query)
 
@@ -90,21 +90,28 @@ class MariaDB_ge:
         ge_offers
         (osrs_user, offer, item, quantity, state, bid, time_orginal_bid, time_update_bid)
         VALUES
-        ('{osrs_user}', 'SELL', '{item}', {quantity}, 'waiting', {price}, '{now}', '{now}')
+        ('{osrs_user}', 'SELL', '{item}', {quantity}, 'request', {price}, '{now}', '{now}');
         '''
         self.execute(query)
 
     def existing_offer(self, osrs_user):
-        query = '''
+        query = f'''
         SELECT
-        osrs_user
+        *
         FROM ge_offers
+        WHERE state != 'collected'
+        AND osrs_user = '{osrs_user}';
         '''
-        if len(self.fetch_all(query)) > 0:
-            return True
-        else:
-            return False
-
+        return self.fetch_all(query)
+    
+    def update_state(self, osrs_user, item, state):
+        query = f'''
+        UPDATE ge_offers
+        SET state = '{state}'
+        WHERE osrs_user = '{osrs_user}'
+        AND item = {item};
+        '''
+        self.execute(query)
 
     def get_pending_jobs(self):
         query = '''

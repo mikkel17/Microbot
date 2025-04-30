@@ -69,6 +69,8 @@ class Jobs():
             return False
 
     def check_skill_requirements(self, req, stats):
+        if req == None or req == '':
+            return True, 'Not in use'
         for skill, lvl in ast.literal_eval(req).items():
             if lvl <= stats[skill]:
                 continue
