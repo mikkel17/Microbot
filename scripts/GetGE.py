@@ -6,29 +6,18 @@ import time
 
 from scripts.script_util.general import General
 from util.logger import SimpleLogger
+from util.db_ge import MariaDB_ge
+from util.db import MariaDB
 
-class GetBank():
+class GetGE():
     def __init__(self, user):
         self.user = user
-        self.plugin_name = "GetBank"
+        self.plugin_name = "GetGE"
         self.general = General()
+        self.db_ge = MariaDB_ge()
+        self.db = MariaDB()
 
-        self.items = [
-            'Coins',
-            'Raw shrimps',
-            'Raw anchovies',
-            'Anchovies',
-            'Shrimps',
-            'Iron ore',
-            'pickaxe',
-            ' axe',
-            'Small fishing net',
-            'Tin ore',
-            'Copper ore',
-            'Bronze bar',
-            'Iron bar',
-            'Hammer'
-        ]
+        self.user_dict = self.db.get_user(self.user)[0]
 
 
     def get_plugin_by_name(self, microbot):
@@ -40,6 +29,13 @@ class GetBank():
                     return plugin
 
     def run(self):
+
+        if not self.db_ge.existing_offer(self.user_dict['osrs_user']):
+            return
+        
+        
+
+
         MAX_RETRIES = 3
         DELAY_BETWEEN_RETRIES = 1  # seconds
 
@@ -67,6 +63,6 @@ if __name__ == "__main__":
     MainClass = JClass("net.runelite.client.RuneLite")
     MainClass.main([])
 
-    stats = GetBank('osrs02')
+    stats = GetGE('osrs02')
     time.sleep(10)
     stats.run()

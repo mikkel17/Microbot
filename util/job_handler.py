@@ -43,7 +43,7 @@ class Jobs():
                 continue
         if len(chosen_job) > 1:
             for job in chosen_job:
-                met_req, item_req = self.check_item_requirements(job, bank)
+                met_req, item_req = self.check_item_requirements(job['req_item'], bank)
                 if met_req:
                     return job
             return chosen_job[0]
@@ -52,7 +52,7 @@ class Jobs():
         
 
     def check_item_requirements(self, req, bank):
-        if type(req) != dict:
+        if req == None or req == '':
             return True, 'Not in use'
         for item_req, amount in ast.literal_eval(req).items():
             if amount <= bank[item_req]:

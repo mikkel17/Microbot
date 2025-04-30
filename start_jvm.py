@@ -14,6 +14,7 @@ from scripts.AutoSmtihing import AutoSmithing
 from scripts.AutoMining import AutoMining 
 from scripts.GetStats import GetStats
 from scripts.GetBank import GetBank
+from scripts.GetGE import GetGE
 from scripts.script_util.general import General
 from scripts.GoForAWalk import GoForAWalk
 from util.db import MariaDB
@@ -38,7 +39,8 @@ class jvm():
             "AutoSmelting": AutoSmelting,
             "GoForAWalk": GoForAWalk,
             "AutoCombat": AutoCombat,
-            "AutoSmithing": AutoSmithing
+            "AutoSmithing": AutoSmithing,
+            "GetGE": GetGE
         }
         
         JAR_PATH = "/opt/microbot/microbot.jar"

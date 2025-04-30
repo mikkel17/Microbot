@@ -232,19 +232,15 @@ public class VarrockAnvilScript extends Script {
                 shutdown();
             }
             
+            sleep(180, 540);
+            Rs2Bank.closeBank();
+            sleep(180, 540);
             // Exit if we withdrew too few bars from bank.
             if (Rs2Inventory.count(barType.getId()) < 5) {
                 debug("Too few bars in bank");
-                System.out.println("COUNT OF BARS!!!!!!!!");
-                System.out.println(Rs2Inventory.count(barType.getId()));
                 Microbot.showMessage("Too few bars in bank.");
                 shutdown();
             }
-            sleep(180, 540);
-            Rs2Bank.closeBank();
-
-            System.out.println("COUNT OF BARS!!!!!!!!");
-            System.out.println(Rs2Inventory.count(barType.getId()));
         }
     }
 
