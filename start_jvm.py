@@ -179,7 +179,6 @@ class jvm():
             self.stop_jvm(job_dict)
         except Exception as e:
             self.logger.info(self.user, f'An exception happened: \n {e}')
-            job.stop()
             self.stop_jvm(job_dict)
 
 if __name__ == "__main__":

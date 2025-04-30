@@ -1,70 +1,14 @@
 import random
 from util.db import MariaDB
 import ast
+from util.goals import Goals
+from util.logger import SimpleLogger
 
 class Jobs():
     def __init__(self):
         self.db = MariaDB()
-        
-        self.skill_goals = {
-            "Attack": 40,
-            "Strength": 40,
-            "Defence": 30,
-            "Ranged": 50,
-            "Prayer": 50,
-            "Magic": 50,
-            "Runecraft": 50,
-            "Hitpoints": 50,
-            "Crafting": 50,
-            "Mining": 50,
-            "Smithing": 99,
-            "Fishing": 50,
-            "Cooking": 50,
-            "Firemaking": 50,
-            "Woodcutting": 50,
-            "Agility": 1,
-            "Herblore": 1,
-            "Thieving": 1,
-            "Fletching": 1,
-            "Slayer": 1,
-            "Farming": 1,
-            "Construction": 1,
-            "Hunter": 1
-        }
-        
-
-        ## TESTING GOALS
-        '''self.skill_goals = {
-            "Attack": 1,
-            "Strength": 1,
-            "Defence": 1,
-            "Ranged": 1,
-            "Prayer": 1,
-            "Magic": 1,
-            "Runecraft": 1,
-            "Hitpoints": 1,
-            "Crafting": 1,
-            "Mining": 1,
-            "Smithing": 99,
-            "Fishing": 1,
-            "Cooking": 1,
-            "Firemaking": 1,
-            "Woodcutting": 1,
-            "Agility": 1,
-            "Herblore": 1,
-            "Thieving": 1,
-            "Fletching": 1,
-            "Slayer": 1,
-            "Farming": 1,
-            "Construction": 1,
-            "Hunter": 1
-        }'''
-    
-        self.combat_type = ['Attack', 'Defence', 'Hitpoints', 'Magic', 'Prayer', 'Ranged', 'Strength']
-        self.gathering_type = ['Farming', 'Fishing', 'Hunter', 'Mining', 'Woodcutting']
-        self.production_type = ['Cooking', 'Crafting', 'Fletching', 'Herblore', 'Runecraft', 'Smithing']
-        self.utility_type = ['Agility', 'Construction', 'Firemaking', 'Slayer', 'Thieving']
-
+        self.goal = Goals()
+        self.logger = SimpleLogger()
     
     def get_least_trained_trainable_skill(self, doable_jobs, skill_values):
         trainable_skills = []
@@ -72,8 +16,11 @@ class Jobs():
             if job['skill'] not in trainable_skills:
                 trainable_skills.append(job['skill'])
         
+        # Pick current goal
+        skill_goals = self.goal.get_goal(skill_values)
+
         # Filter the dictionaries to include only trainable skills
-        filtered_skill_goals = {skill: self.skill_goals[skill] for skill in trainable_skills}
+        filtered_skill_goals = {skill: skill_goals[skill] for skill in trainable_skills}
         filtered_skill_values = {skill: skill_values[skill] for skill in trainable_skills}
 
         # Calculate the differences for the filtered skills
@@ -104,27 +51,74 @@ class Jobs():
             return chosen_job[0]
         
 
-    def check_item_requirements(self, job, bank):
-        for item_req, amount in ast.literal_eval(job['req_item']).items():
+    def check_item_requirements(self, req, bank):
+        if type(req) != dict:
+            return True, 'Not in use'
+        for item_req, amount in ast.literal_eval(req).items():
             if amount <= bank[item_req]:
                 continue
             else:
                 return False, item_req
         return True, 'Not in use'
-    
-    def check_skill_requirements(self, job, stats):
-        for skill, lvl in ast.literal_eval(job['req_skill']).items():
+
+    def check_gp_requirements(self, req, bank):
+        amount = int(req)
+        if amount <= bank['Coins']:
+            return True
+        else:
+            return False
+
+    def check_skill_requirements(self, req, stats):
+        for skill, lvl in ast.literal_eval(req).items():
             if lvl <= stats[skill]:
                 continue
             else:
                 return False, skill
         return True, 'Not in use'
 
+    def check_quest_requirements(self, req):
+        return True
 
     def supply_chain_method(self, job_being_checked, doable_jobs, stats, bank):
-            result_skill, failing_skill = self.check_skill_requirements(job_being_checked, stats)
-            result_item, failing_item = self.check_item_requirements(job_being_checked, bank)
+            result_skill, failing_skill = self.check_skill_requirements(job_being_checked['req_skill'], stats)
+            result_quest = self.check_quest_requirements(job_being_checked['req_quest'])
+            result_tool, failing_tool = self.check_item_requirements(job_being_checked['req_tool'], bank)
+            result_item, failing_item = self.check_item_requirements(job_being_checked['req_item'], bank)
+            result_gp = self.check_gp_requirements(job_being_checked['req_gp'], bank)
             
+            ############
+            #Go through one by one
+            if not result_skill:
+                for job in doable_jobs:
+                    for output_skill in job['output_skill'].split(','):
+                        if output_skill == failing_skill:
+                            return job, False
+            elif not result_quest:
+                # DO QUEST, NOT IMPLEMENTED
+                raise
+            elif not result_tool:
+                for job in doable_jobs:
+                    for output_item in job['output_item'].split(','):
+                        if output_item == failing_tool:
+                            return job, False
+                        else:
+                            continue
+                self.logger.info('user not available', f'supply_chain_method "not result_tool" didn\'t find a job with {failing_tool}')
+            elif not result_item:
+                for job in doable_jobs:
+                    for output_item in job['output_item'].split(','):
+                        if output_item == failing_item:
+                            return job, False
+                        else:
+                            continue
+                self.logger.info('user not available', f'supply_chain_method "not result_tool" didn\'t find a job with {failing_item}')
+            elif not result_gp:
+                # DO JOB WITH COIN OUTPUT
+                raise
+            else:
+                return job_being_checked, True
+
+            '''
             if result_skill and result_item:
                 return job_being_checked, True
             elif result_skill and not result_item:
@@ -153,7 +147,7 @@ class Jobs():
             else:
                 raise Exception
             ### at this point, if we can't find a job that can deliver the right item, we need to buy the item (COMING SOON)
-
+            '''
    
     def get_skilling_job(self, stats, bank):
         doable_jobs = []
