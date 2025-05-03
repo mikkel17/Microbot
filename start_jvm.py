@@ -166,7 +166,7 @@ class jvm():
                     job.run(job_dict)
                     break
                 elif first_loop:
-                    self.logger.info(self.user, f'Job assigned: {job_dict['script']}')
+                    self.logger.info(self.user, f'Job assigned: {job_dict['name']}')
                     job.run(job_dict)
                     first_loop = False
 
