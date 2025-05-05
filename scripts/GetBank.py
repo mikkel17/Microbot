@@ -21,7 +21,6 @@ class GetBank():
             'Shrimps',
             'Iron ore',
             'pickaxe',
-            ' axe',
             'Small fishing net',
             'Tin ore',
             'Copper ore',
