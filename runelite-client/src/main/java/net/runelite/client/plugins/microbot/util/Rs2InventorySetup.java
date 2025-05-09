@@ -66,7 +66,7 @@ public class Rs2InventorySetup {
      *
      * @return true if the scheduler is cancelled, false otherwise.
      */
-    private boolean isMainSchedulerCancelled() {
+    public boolean isMainSchedulerCancelled() {
         return _mainScheduler != null && _mainScheduler.isCancelled();
     }
 
@@ -268,6 +268,9 @@ public class Rs2InventorySetup {
      * @return true if the inventory matches the setup, false otherwise.
      */
     public boolean doesInventoryMatch() {
+        if( inventorySetup.getInventory() == null) {
+            return false;
+        }
         Map<Integer, List<InventorySetupsItem>> groupedByItems = inventorySetup.getInventory().stream().collect(Collectors.groupingBy(InventorySetupsItem::getId));
         boolean found = true;
         for (Integer key : groupedByItems.keySet()) {
