@@ -98,14 +98,6 @@ class Jobs():
             elif not result_quest:
                 # DO QUEST, NOT IMPLEMENTED
                 raise
-            elif not result_tool:
-                for job in doable_jobs:
-                    for output_item in job['output_item'].split(','):
-                        if output_item == failing_tool:
-                            return job, False
-                        else:
-                            continue
-                self.logger.info('user not available', f'supply_chain_method "not result_tool" didn\'t find a job with {failing_tool}')
             elif not result_item:
                 for job in doable_jobs:
                     for output_item in job['output_item'].split(','):
@@ -114,6 +106,14 @@ class Jobs():
                         else:
                             continue
                 self.logger.info('user not available', f'supply_chain_method "not result_tool" didn\'t find a job with {failing_item}')
+            elif not result_tool:
+                for job in doable_jobs:
+                    for output_item in job['output_item'].split(','):
+                        if output_item == failing_tool:
+                            return job, False
+                        else:
+                            continue
+                self.logger.info('user not available', f'supply_chain_method "not result_tool" didn\'t find a job with {failing_tool}')
             elif not result_gp:
                 # DO JOB WITH COIN OUTPUT
                 raise

@@ -67,7 +67,8 @@ class jvm():
         if Microbot.lastScriptMessage == "":
             return True
         elif Microbot.lastScriptMessage == "WebWalker troubles":
-            self.db.info(self.user, f'WebWalker troubles - trying again. Script: {job_dict['script']}')
+            self.logger.info(self.user, f'WebWalker troubles - trying again. Script: {job_dict['script']}')
+            Microbot.lastScriptMessage = ""
             return True
         else:
             self.logger.info(self.user, f'showMessage: {Microbot.lastScriptMessage}')

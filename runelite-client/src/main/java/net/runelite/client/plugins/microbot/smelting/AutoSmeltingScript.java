@@ -113,6 +113,7 @@ public class AutoSmeltingScript extends Script {
                 Microbot.showMessage(MessageFormat.format("Required Materials not in bank. You need {1} {0}.", name, totalAmount));
                 super.shutdown();
             }
+            System.out.println(name + ", " + totalAmount);
             Rs2Bank.withdrawX(name, totalAmount, true);
             sleepUntil(() -> Rs2Inventory.hasItemAmount(name, totalAmount, false, true), 3500);
 

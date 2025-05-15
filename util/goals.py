@@ -38,7 +38,7 @@ class Goals():
             "Hitpoints": 50,
             "Crafting": 50,
             "Mining": 50,
-            "Smithing": 99,
+            "Smithing": 70,
             "Fishing": 50,
             "Cooking": 50,
             "Firemaking": 50,

@@ -179,7 +179,7 @@ class General():
 
     def login(self):
         self.enable_plugin('AutoLogin')
-        time.sleep(20)
+        time.sleep(25)
         self.stop('AutoLogin')
 
     def enable_plugin(self, plugin_name):

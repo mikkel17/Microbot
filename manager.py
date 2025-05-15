@@ -10,7 +10,7 @@ class manager():
     def __init__(self):
         self.db = MariaDB()
         self.logger = SimpleLogger()
-        self.jvm_capacity = 3
+        self.jvm_capacity = 2
         self.hostname = socket.gethostname()
 
     def start_new_jvm(self, user):
@@ -27,8 +27,8 @@ class manager():
             self.db.reset_playtime(date.today())
             available_jvm_spots = self.jvm_capacity - len(self.db.get_user_status_working(self.hostname))
             users = self.db.get_user_status_stopped(self.hostname, available_jvm_spots)
-            if users != prev_users:
-                self.logger.info('Manager', f'Users status=stopped: {users}')
+            #if users != prev_users:
+                #self.logger.info('Manager', f'Users status=stopped: {users}')
             
             for user in users:
                 self.start_new_jvm(user['os_user'])
