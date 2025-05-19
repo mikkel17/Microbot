@@ -10,7 +10,7 @@ class manager():
     def __init__(self):
         self.db = MariaDB()
         self.logger = SimpleLogger()
-        self.jvm_capacity = 2
+        self.jvm_capacity = 3
         self.hostname = socket.gethostname()
 
     def start_new_jvm(self, user):
